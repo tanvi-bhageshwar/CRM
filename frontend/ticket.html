@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ticket detail — Support desk</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <a class="brand" href="/index.html">CRM Desk</a>
+      <div class="nav-links">
+        <a class="nav-link active" href="/index.html">Tickets</a>
+        <a class="nav-link" href="/new.html">New ticket</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-shell">
+    <a class="back-link" href="/index.html">&larr; Back to tickets</a>
+    <div id="content" class="detail-shell">Loading...</div>
+  </div>
+
+<script src="/static/api.js"></script>
+<script>
+  const ticketId = new URLSearchParams(location.search).get("id");
+  const contentEl = document.getElementById("content");
+
+  async function load() {
+    let ticket;
+    try {
+      ticket = await apiGetTicket(ticketId);
+    } catch (err) {
+      contentEl.innerHTML = `<p style="color:var(--ink-soft);margin-top:24px;">Ticket not found.</p>`;
+      return;
+    }
+
+    contentEl.innerHTML = `
+      <div class="card detail-hero">
+        <div class="detail-top">
+          <div>
+            <span class="mono" style="color:var(--ink-soft);font-size:13px;">${ticket.ticket_id}</span>
+            <h1 style="font-size:24px;font-weight:700;margin:6px 0 6px;">${ticket.subject}</h1>
+            <p style="color:var(--ink-soft);font-size:14px;margin:0;">${ticket.customer_name} &middot; ${ticket.customer_email}</p>
+          </div>
+          <span class="${statusBadgeClass(ticket.status)}">${ticket.status}</span>
+        </div>
+
+        <div class="detail-meta">
+          <div class="meta-box">
+            <strong>Created</strong>
+            <span>${formatDate(ticket.created_at)}</span>
+          </div>
+          <div class="meta-box">
+            <strong>Customer</strong>
+            <span>${ticket.customer_name}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card panel">
+        <p class="panel-title">Description</p>
+        <p style="margin:0;white-space:pre-wrap;line-height:1.7;">${ticket.description}</p>
+      </div>
+
+      <div class="card panel">
+        <p class="panel-title">Update status</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          ${["Open", "In Progress", "Closed"].map(s => `
+            <button class="btn-secondary" data-status="${s}"
+              style="${s === ticket.status ? 'border-color:var(--accent);color:var(--accent);' : ''}"
+              onclick="setStatus('${s}')">${s}</button>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="card panel">
+        <p class="panel-title">Notes</p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+          ${ticket.notes.length === 0
+            ? `<p style="color:var(--ink-soft);font-size:14px;margin:0;">No notes yet.</p>`
+            : ticket.notes.map(n => `
+                <div class="note-item">
+                  <p>${n.note_text}</p>
+                  <p class="note-time">${formatDate(n.created_at)}</p>
+                </div>
+              `).join("")}
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <input id="noteInput" placeholder="Add a note..." />
+          <button class="btn-primary" onclick="addNote()">Add</button>
+        </div>
+      </div>
+    `;
+  }
+
+  async function setStatus(status) {
+    await apiUpdateTicket(ticketId, { status });
+    load();
+  }
+
+  async function addNote() {
+    const input = document.getElementById("noteInput");
+    const text = input.value.trim();
+    if (!text) return;
+    await apiUpdateTicket(ticketId, { notes: text });
+    load();
+  }
+
+  load();
+</script>
+</body>
+</html>

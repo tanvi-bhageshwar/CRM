@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>New ticket — Support desk</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <a class="brand" href="/index.html">CRM Desk</a>
+      <div class="nav-links">
+        <a class="nav-link" href="/index.html">Tickets</a>
+        <a class="nav-link active" href="/new.html">New ticket</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-shell">
+    <a class="back-link" href="/index.html">&larr; Back to tickets</a>
+
+    <div class="form-layout">
+      <div class="card info-card">
+        <p class="eyebrow">New request</p>
+        <h2>Capture the issue clearly so your team can act fast.</h2>
+        <ul>
+          <li>Share the customer name and contact details.</li>
+          <li>Write a clear subject and description.</li>
+          <li>Keep the status visible for the rest of the team.</li>
+        </ul>
+      </div>
+
+      <form id="ticketForm" class="card form-card">
+        <div class="form-grid">
+          <div class="row">
+            <div>
+              <label>Customer name</label>
+              <input name="customer_name" required maxlength="200" />
+            </div>
+            <div>
+              <label>Customer email</label>
+              <input name="customer_email" type="email" required maxlength="200" />
+            </div>
+          </div>
+          <div>
+            <label>Subject</label>
+            <input name="subject" required maxlength="200" />
+          </div>
+          <div>
+            <label>Description</label>
+            <textarea name="description" rows="6" required maxlength="5000"></textarea>
+          </div>
+          <p id="formError" style="color:#b3261e;font-size:13px;display:none;margin:0;"></p>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Create ticket</button>
+            <a class="btn-link" href="/index.html"><button type="button" class="btn-secondary">Cancel</button></a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script src="/static/api.js"></script>
+<script>
+  const form = document.getElementById("ticketForm");
+  const errorEl = document.getElementById("formError");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorEl.style.display = "none";
+    const data = Object.fromEntries(new FormData(form).entries());
+    try {
+      const result = await apiCreateTicket(data);
+      location.href = `/ticket.html?id=${result.ticket_id}`;
+    } catch (err) {
+      errorEl.textContent = err.detail
+        ? (Array.isArray(err.detail) ? err.detail.map(d => d.msg).join(", ") : err.detail)
+        : "Something went wrong creating the ticket. Please try again.";
+      errorEl.style.display = "block";
+    }
+  });
+</script>
+</body>
+</html>
