@@ -56,6 +56,10 @@
             <strong>Customer</strong>
             <span>${ticket.customer_name}</span>
           </div>
+          <div class="meta-box">
+            <strong>Priority</strong>
+            <span class="${priorityBadgeClass(ticket.priority)}">${ticket.priority}</span>
+          </div>
         </div>
       </div>
 
@@ -71,6 +75,17 @@
             <button class="btn-secondary" data-status="${s}"
               style="${s === ticket.status ? 'border-color:var(--accent);color:var(--accent);' : ''}"
               onclick="setStatus('${s}')">${s}</button>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="card panel">
+        <p class="panel-title">Update priority</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          ${["Low", "Medium", "High"].map(p => `
+            <button class="btn-secondary" data-priority="${p}"
+              style="${p === ticket.priority ? 'border-color:var(--accent);color:var(--accent);' : ''}"
+              onclick="setPriority('${p}')">${p}</button>
           `).join("")}
         </div>
       </div>
@@ -97,6 +112,11 @@
 
   async function setStatus(status) {
     await apiUpdateTicket(ticketId, { status });
+    load();
+  }
+
+  async function setPriority(priority) {
+    await apiUpdateTicket(ticketId, { priority });
     load();
   }
 

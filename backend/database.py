@@ -32,6 +32,7 @@ def init_db() -> None:
             subject TEXT NOT NULL,
             description TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'Open',
+            priority TEXT NOT NULL DEFAULT 'Medium',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -47,5 +48,13 @@ def init_db() -> None:
         CREATE INDEX IF NOT EXISTS idx_notes_ticket_id ON notes(ticket_id);
         """
     )
+
+    # Migration for a DB created before priority existed — CREATE TABLE
+    # IF NOT EXISTS above won't retroactively add the column.
+    existing_columns = {row["name"] for row in conn.execute("PRAGMA table_info(tickets)")}
+    if "priority" not in existing_columns:
+        conn.execute("ALTER TABLE tickets ADD COLUMN priority TEXT NOT NULL DEFAULT 'Medium'")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_tickets_priority ON tickets(priority)")
+
     conn.commit()
     conn.close()

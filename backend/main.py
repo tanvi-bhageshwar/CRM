@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -16,7 +17,15 @@ from models import (
     TicketUpdateResponse,
 )
 
-app = FastAPI(title="Support CRM API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    init_db()
+    yield
+    # Shutdown
+
+
+app = FastAPI(title="Support CRM API", lifespan=lifespan)
 
 # Wide-open CORS is fine for an assessment project served from one origin;
 # tighten this to your real frontend domain before using it for anything else.
@@ -26,11 +35,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-def on_startup() -> None:
-    init_db()
 
 
 def _now() -> str:
@@ -43,6 +47,7 @@ def _row_to_summary(row) -> TicketSummary:
         customer_name=row["customer_name"],
         subject=row["subject"],
         status=row["status"],
+        priority=row["priority"],
         created_at=row["created_at"],
     )
 
@@ -132,6 +137,7 @@ def get_ticket(ticket_id: str):
         subject=row["subject"],
         description=row["description"],
         status=row["status"],
+        priority=row["priority"],
         created_at=row["created_at"],
         updated_at=row["updated_at"],
         notes=[Note(note_text=n["note_text"], created_at=n["created_at"]) for n in note_rows],

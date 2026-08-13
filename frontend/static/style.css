@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
 
 :root {
@@ -326,6 +325,10 @@ tr.ticket-row:hover { background: #f8faff; }
 .badge-open     { background: var(--open-bg);   color: var(--open-ink); }
 .badge-progress { background: var(--prog-bg);   color: var(--prog-ink); }
 .badge-closed   { background: var(--closed-bg); color: var(--closed-ink); }
+
+.badge-priority-high   { background: #fde2e1; color: #b3261e; }
+.badge-priority-medium { background: #fff3df; color: #a05f00; }
+.badge-priority-low    { background: #eef2f8; color: #64748b; }
 
 .suggestion-item {
   padding: 10px 14px;

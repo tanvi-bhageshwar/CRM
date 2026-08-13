@@ -69,6 +69,12 @@
         <option value="In Progress">In Progress</option>
         <option value="Closed">Closed</option>
       </select>
+      <select id="priorityFilter">
+        <option value="">All priorities</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+      </select>
     </div>
 
     <div class="card" style="overflow:hidden;">
@@ -83,11 +89,11 @@
         <table>
           <thead>
             <tr>
-              <th>ID</th><th>Customer</th><th>Subject</th><th>Status</th><th>Created</th>
+              <th>ID</th><th>Customer</th><th>Subject</th><th>Priority</th><th>Status</th><th>Created</th>
             </tr>
           </thead>
           <tbody id="ticketRows">
-            <tr><td colspan="5" style="text-align:center;color:var(--ink-soft);">Loading tickets...</td></tr>
+            <tr><td colspan="6" style="text-align:center;color:var(--ink-soft);">Loading tickets...</td></tr>
           </tbody>
         </table>
       </div>
@@ -103,6 +109,7 @@
   const emptyEl = document.getElementById("emptyState");
   const searchEl = document.getElementById("search");
   const statusEl = document.getElementById("statusFilter");
+  const priorityEl = document.getElementById("priorityFilter");
   const suggestionsEl = document.getElementById("suggestions");
   const openCountEl = document.getElementById("openCount");
   const progressCountEl = document.getElementById("progressCount");
@@ -115,6 +122,7 @@
   async function refresh() {
     const tickets = await apiListTickets({
       status: statusEl.value,
+      priority: priorityEl.value,
       search: searchEl.value.trim(),
     });
 
@@ -141,6 +149,7 @@
         <td class="mono">${t.ticket_id}</td>
         <td>${t.customer_name}</td>
         <td>${t.subject}</td>
+        <td><span class="${priorityBadgeClass(t.priority)}">${t.priority}</span></td>
         <td><span class="${statusBadgeClass(t.status)}">${t.status}</span></td>
         <td>${formatDate(t.created_at)}</td>
       </tr>
@@ -236,6 +245,7 @@
   });
 
   statusEl.addEventListener("change", refresh);
+  priorityEl.addEventListener("change", refresh);
 
   refresh();
 </script>

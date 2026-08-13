@@ -11,9 +11,10 @@ async function apiCreateTicket(data) {
   return res.json();
 }
 
-async function apiListTickets({ status = "", search = "" } = {}) {
+async function apiListTickets({ status = "", priority = "", search = "" } = {}) {
   const params = new URLSearchParams();
   if (status) params.set("status", status);
+  if (priority) params.set("priority", priority);
   if (search) params.set("search", search);
   const res = await fetch(`${API_BASE}?${params.toString()}`);
   if (!res.ok) throw await res.json();
@@ -40,6 +41,12 @@ function statusBadgeClass(status) {
   if (status === "Open") return "badge badge-open";
   if (status === "In Progress") return "badge badge-progress";
   return "badge badge-closed";
+}
+
+function priorityBadgeClass(priority) {
+  if (priority === "High") return "badge badge-priority-high";
+  if (priority === "Low") return "badge badge-priority-low";
+  return "badge badge-priority-medium";
 }
 
 function formatDate(iso) {
